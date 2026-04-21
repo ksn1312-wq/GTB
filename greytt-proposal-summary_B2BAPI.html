@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Greytt B2B API v1 — Proposal Brief</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0d;
+    --ink-2: #3d3b38;
+    --ink-3: #7a7770;
+    --surface: #faf9f7;
+    --surface-2: #f2f0eb;
+    --surface-3: #e8e4dd;
+    --accent: #1a3a2a;
+    --accent-light: #e8f0eb;
+    --risk-bg: #fff1f0;
+    --risk-fg: #8b1a1a;
+    --risk-border: #f5c2c2;
+    --dep-bg: #fff8ed;
+    --dep-fg: #7a4a00;
+    --dep-border: #f5dfa0;
+    --pos-bg: #edf7f0;
+    --pos-fg: #1a5c35;
+    --pos-border: #b8dfc7;
+    --assume-bg: #edf2ff;
+    --assume-fg: #1a2e6b;
+    --assume-border: #b8c8f5;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  header {
+    background: var(--accent);
+    padding: 48px 20px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: 30px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+  }
+
+  .header-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.08);
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    line-height: 1.15;
+    color: #fff;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    position: relative;
+    z-index: 1;
+  }
+
+  .meta-strip {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 14px 20px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--surface-3);
+  }
+
+  .meta-pill {
+    font-size: 11px;
+    color: var(--ink-3);
+    background: var(--surface-3);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .meta-pill span {
+    color: var(--ink-2);
+  }
+
+  main {
+    padding: 0 0 60px;
+  }
+
+  section {
+    padding: 28px 20px 0;
+  }
+
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .section-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-summary { background: var(--accent); }
+  .dot-positive { background: #2a9d5c; }
+  .dot-risk { background: #c0392b; }
+  .dot-assume { background: #3a5bd9; }
+  .dot-dep { background: #c87a00; }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  /* Summary card */
+  .summary-card {
+    background: #fff;
+    border-radius: var(--radius);
+    border: 1px solid var(--surface-3);
+    overflow: hidden;
+  }
+
+  .summary-lede {
+    padding: 20px;
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--ink);
+    border-bottom: 1px solid var(--surface-2);
+  }
+
+  .summary-lede em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .endpoints-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .endpoint-cell {
+    padding: 16px;
+    border-bottom: 1px solid var(--surface-2);
+  }
+
+  .endpoint-cell:first-child {
+    border-right: 1px solid var(--surface-2);
+  }
+
+  .endpoint-method {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 8px;
+    font-family: 'DM Sans', monospace;
+  }
+
+  .method-get { background: var(--pos-bg); color: var(--pos-fg); }
+  .method-post { background: var(--assume-bg); color: var(--assume-fg); }
+
+  .endpoint-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .endpoint-desc {
+    font-size: 11px;
+    color: var(--ink-3);
+    line-height: 1.5;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+
+  .stat-cell {
+    padding: 14px 16px;
+    text-align: center;
+    border-right: 1px solid var(--surface-2);
+  }
+
+  .stat-cell:last-child { border-right: none; }
+
+  .stat-val {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--accent);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--ink-3);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .targets-list {
+    padding: 16px 20px;
+  }
+
+  .target-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--surface-2);
+    font-size: 13px;
+  }
+
+  .target-row:last-child { border-bottom: none; }
+
+  .target-key { color: var(--ink-2); }
+
+  .target-val {
+    font-weight: 500;
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  /* Item cards */
+  .item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .item-card {
+    border-radius: var(--radius-sm);
+    border: 1px solid;
+    padding: 14px 16px;
+    position: relative;
+  }
+
+  .item-card.risk    { background: var(--risk-bg);   border-color: var(--risk-border); }
+  .item-card.assume  { background: var(--assume-bg); border-color: var(--assume-border); }
+  .item-card.dep     { background: var(--dep-bg);    border-color: var(--dep-border); }
+  .item-card.pos     { background: var(--pos-bg);    border-color: var(--pos-border); }
+
+  .item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+    gap: 8px;
+  }
+
+  .item-id {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    font-family: monospace;
+    padding: 2px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .id-risk   { background: var(--risk-border);   color: var(--risk-fg); }
+  .id-assume { background: var(--assume-border); color: var(--assume-fg); }
+  .id-dep    { background: var(--dep-border);    color: var(--dep-fg); }
+  .id-pos    { background: var(--pos-border);    color: var(--pos-fg); }
+
+  .sev-badge {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .sev-high { background: #f5c2c2; color: #7a0000; }
+  .sev-med  { background: #f5dfa0; color: #5a3000; }
+  .sev-low  { background: #b8dfc7; color: #0f3d22; }
+
+  .item-desc {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.55;
+    margin-bottom: 8px;
+  }
+
+  .item-action {
+    font-size: 11px;
+    color: var(--ink-3);
+    line-height: 1.5;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    padding-top: 8px;
+    margin-top: 2px;
+  }
+
+  .item-action strong {
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+
+  /* Positive items are simpler */
+  .pos-icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--pos-border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+
+  .pos-icon::after {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--pos-fg);
+  }
+
+  .pos-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 16px;
+    background: var(--pos-bg);
+    border: 1px solid var(--pos-border);
+    border-radius: var(--radius-sm);
+  }
+
+  .pos-text {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.55;
+  }
+
+  .pos-text strong {
+    font-weight: 500;
+    color: var(--pos-fg);
+    display: block;
+    margin-bottom: 2px;
+    font-size: 12px;
+  }
+
+  /* Non-goals */
+  .ng-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--surface-3);
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+
+  .ng-row:last-child { border-bottom: none; }
+
+  .ng-dash {
+    width: 14px; height: 1.5px;
+    background: var(--surface-3);
+    flex-shrink: 0;
+  }
+
+  .ng-card {
+    background: #fff;
+    border: 1px solid var(--surface-3);
+    border-radius: var(--radius-sm);
+    padding: 4px 16px;
+    margin-top: 16px;
+  }
+
+  footer {
+    margin: 0 20px;
+    padding: 20px 0;
+    border-top: 1px solid var(--surface-3);
+    font-size: 11px;
+    color: var(--ink-3);
+    text-align: center;
+  }
+
+  .spacer { height: 8px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">Feature Proposal · Draft</div>
+  <h1>Greytt B2B<br>API v1</h1>
+  <p class="header-sub">Journeys Platform · Public Beta Target · Updated 2026-04-20</p>
+</header>
+
+<div class="meta-strip">
+  <div class="meta-pill">Status <span>Draft</span></div>
+  <div class="meta-pill">Owner <span>Journeys Platform</span></div>
+  <div class="meta-pill">Target <span>Public Beta</span></div>
+  <div class="meta-pill">Endpoints <span>2</span></div>
+</div>
+
+<main>
+
+  <!-- SUMMARY -->
+  <section>
+    <div class="section-label">
+      <div class="section-dot dot-summary"></div>
+      <span class="section-title">Summary</span>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-lede">
+        Expose the <em>Greytt Score™</em> — a Fit-for-50+ hotel rating — to B2B partners via a stable, authenticated HTTP API. Two endpoints, one shared scoring engine.
+      </div>
+
+      <div class="endpoints-row">
+        <div class="endpoint-cell">
+          <div class="endpoint-method method-get">GET</div>
+          <div class="endpoint-name">Baseline Score</div>
+          <div class="endpoint-desc">Standard Greytt Score for any hotel, cached and fast.</div>
+        </div>
+        <div class="endpoint-cell">
+          <div class="endpoint-method method-post">POST</div>
+          <div class="endpoint-name">Personalized Score</div>
+          <div class="endpoint-desc">Partner-supplied preferences (1–9) shape the output.</div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-cell">
+          <span class="stat-val">9</span>
+          <span class="stat-label">Preferences</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-val">99.9%</span>
+          <span class="stat-label">Availability</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-val">10k</span>
+          <span class="stat-label">Req / day</span>
+        </div>
+      </div>
+
+      <div class="targets-list">
+        <div class="target-row">
+          <span class="target-key">Base URL</span>
+          <span class="target-val">api.greytt.ai/b2b/v1</span>
+        </div>
+        <div class="target-row">
+          <span class="target-key">Auth</span>
+          <span class="target-val">Bearer key · TLS 1.2+</span>
+        </div>
+        <div class="target-row">
+          <span class="target-key">Baseline P95</span>
+          <span class="target-val">&lt; 300 ms</span>
+        </div>
+        <div class="target-row">
+          <span class="target-key">Personalized P95</span>
+          <span class="target-val">&lt; 800 ms</span>
+        </div>
+        <div class="target-row">
+          <span class="target-key">Rate limit</span>
+          <span class="target-val">60 req/min</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="ng-card">
+      <div class="ng-row"><div class="ng-dash"></div>Sight scoring endpoint (v1.1)</div>
+      <div class="ng-row"><div class="ng-dash"></div>Batch destination scoring</div>
+      <div class="ng-row"><div class="ng-dash"></div>Write endpoints</div>
+      <div class="ng-row"><div class="ng-dash"></div>Partner-specific weighting models</div>
+    </div>
+  </section>
+
+  <!-- POSITIVE POINTS -->
+  <section>
+    <div class="section-label">
+      <div class="section-dot dot-positive"></div>
+      <span class="section-title">Strengths</span>
+    </div>
+    <div class="item-list">
+      <div class="pos-row">
+        <div class="pos-icon"></div>
+        <div class="pos-text">
+          <strong>Clean two-endpoint symmetry</strong>
+          GET baseline / POST personalized share one response schema, enabling incremental partner adoption without divergent integration paths.
+        </div>
+      </div>
+      <div class="pos-row">
+        <div class="pos-icon"></div>
+        <div class="pos-text">
+          <strong>Correct cache key design</strong>
+          Personalized cache keyed on preference hash + engine + data version prevents stale cross-preference collisions.
+        </div>
+      </div>
+      <div class="pos-row">
+        <div class="pos-icon"></div>
+        <div class="pos-text">
+          <strong>Thorough error model</strong>
+          410 hotel_delisted and 422 insufficient_data are non-obvious codes that show real operational maturity and reduce partner support burden.
+        </div>
+      </div>
+      <div class="pos-row">
+        <div class="pos-icon"></div>
+        <div class="pos-text">
+          <strong>Realistic SLOs</strong>
+          Sub-300 ms cached and sub-800 ms computed are achievable with Redis and are specific enough to gate milestone acceptance.
+        </div>
+      </div>
+      <div class="pos-row">
+        <div class="pos-icon"></div>
+        <div class="pos-text">
+          <strong>Well-sequenced workstreams</strong>
+          11 workstreams map clearly to 5 milestones; engine extraction before endpoint build is the correct dependency order.
+        </div>
+      </div>
+      <div class="pos-row">
+        <div class="pos-icon"></div>
+        <div class="pos-text">
+          <strong>Scoped API keys</strong>
+          scores:read scope and optional IP allowlists are good defaults for a B2B surface targeting insurers and assisted-living operators.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RISKS -->
+  <section>
+    <div class="section-label">
+      <div class="section-dot dot-risk"></div>
+      <span class="section-title">Risks</span>
+    </div>
+    <div class="item-list">
+
+      <div class="item-card risk">
+        <div class="item-header">
+          <span class="item-id id-risk">R-001</span>
+          <span class="sev-badge sev-high">High</span>
+        </div>
+        <p class="item-desc">Baseline scoring math not locked before M1. Partners will observe unexplained score drift across data refreshes if default preference weighting is unstable.</p>
+        <div class="item-action"><strong>Action:</strong> Close OQ #1 before M1 kickoff; freeze engine default weights and version them in the OpenAPI schema.</div>
+      </div>
+
+      <div class="item-card risk">
+        <div class="item-header">
+          <span class="item-id id-risk">R-002</span>
+          <span class="sev-badge sev-high">High</span>
+        </div>
+        <p class="item-desc">No cache invalidation policy defined. The 99.9% availability SLA may be breached without specifying stale-on-miss vs. fail-open behaviour before the Redis layer is built.</p>
+        <div class="item-action"><strong>Action:</strong> Define invalidation policy and stale-serve timeout in the design doc prior to M2.</div>
+      </div>
+
+      <div class="item-card risk">
+        <div class="item-header">
+          <span class="item-id id-risk">R-003</span>
+          <span class="sev-badge sev-high">High</span>
+        </div>
+        <p class="item-desc">agodaHotelId exposed in the public B2B schema leaks data sourcing and creates versioning obligations if the Agoda partnership changes.</p>
+        <div class="item-action"><strong>Action:</strong> Resolve OQ #5; move field behind include= param or a scope flag before private beta.</div>
+      </div>
+
+      <div class="item-card risk">
+        <div class="item-header">
+          <span class="item-id id-risk">R-004</span>
+          <span class="sev-badge sev-med">Medium</span>
+        </div>
+        <p class="item-desc">include=raw lacks a contractual definition. Exposing raw scores without a spec creates support debt and partner lock-in on internal implementation details.</p>
+        <div class="item-action"><strong>Action:</strong> Define raw semantics or cut from v1; add to OpenAPI schema with a clear description.</div>
+      </div>
+
+      <div class="item-card risk">
+        <div class="item-header">
+          <span class="item-id id-risk">R-005</span>
+          <span class="sev-badge sev-med">Medium</span>
+        </div>
+        <p class="item-desc">No webhook or event model planned. OTAs caching scores locally will poll at high frequency, inflating quota consumption and masking data staleness.</p>
+        <div class="item-action"><strong>Action:</strong> Stub a score-changed event in the v1.1 plan now to prevent a painful retrofit.</div>
+      </div>
+
+      <div class="item-card risk">
+        <div class="item-header">
+          <span class="item-id id-risk">R-006</span>
+          <span class="sev-badge sev-med">Medium</span>
+        </div>
+        <p class="item-desc">Preference enum published without a governance process. Partners build integrations against exact strings; any rename breaks them silently.</p>
+        <div class="item-action"><strong>Action:</strong> Version the enum in OpenAPI; document the deprecation policy before private beta.</div>
+      </div>
+
+      <div class="item-card risk">
+        <div class="item-header">
+          <span class="item-id id-risk">R-007</span>
+          <span class="sev-badge sev-med">Medium</span>
+        </div>
+        <p class="item-desc">Rate limit aggregation unspecified — per-key vs. per-account. Multi-key partners may bypass the intended 10k req/day cap.</p>
+        <div class="item-action"><strong>Action:</strong> Resolve before auth middleware build (workstream 2); document in the partner-facing quota policy.</div>
+      </div>
+
+      <div class="item-card risk">
+        <div class="item-header">
+          <span class="item-id id-risk">R-008</span>
+          <span class="sev-badge sev-low">Low</span>
+        </div>
+        <p class="item-desc">No API versioning sunset policy mentioned. Partners need a migration guarantee (min 12 months) before committing integration effort.</p>
+        <div class="item-action"><strong>Action:</strong> Add a migration policy section to the API contract before public beta.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ASSUMPTIONS -->
+  <section>
+    <div class="section-label">
+      <div class="section-dot dot-assume"></div>
+      <span class="section-title">Assumptions</span>
+    </div>
+    <div class="item-list">
+
+      <div class="item-card assume">
+        <div class="item-header">
+          <span class="item-id id-assume">A-001</span>
+          <span class="sev-badge sev-high">High</span>
+        </div>
+        <p class="item-desc">The internal scoring engine can be extracted cleanly without significant refactoring. If tightly coupled, M1 timeline is immediately at risk.</p>
+        <div class="item-action"><strong>Action:</strong> Run an extraction spike in week 1; validate before M1 milestone date is set.</div>
+      </div>
+
+      <div class="item-card assume">
+        <div class="item-header">
+          <span class="item-id id-assume">A-002</span>
+          <span class="sev-badge sev-high">High</span>
+        </div>
+        <p class="item-desc">Pricing model (OQ #3) will be resolved before private beta. Beta partner recruitment is blocked without knowing what tiers and quotas they are signing up for.</p>
+        <div class="item-action"><strong>Action:</strong> Close OQ #3 before M3; pricing must precede partner agreement drafts.</div>
+      </div>
+
+      <div class="item-card assume">
+        <div class="item-header">
+          <span class="item-id id-assume">A-003</span>
+          <span class="sev-badge sev-med">Medium</span>
+        </div>
+        <p class="item-desc">Data freshness SLA (OQ #4) is achievable at the proposed cache TTL. No data refresh cadence is documented in the proposal.</p>
+        <div class="item-action"><strong>Action:</strong> Define refresh cadence and include it in the SLO section before M2.</div>
+      </div>
+
+      <div class="item-card assume">
+        <div class="item-header">
+          <span class="item-id id-assume">A-004</span>
+          <span class="sev-badge sev-med">Medium</span>
+        </div>
+        <p class="item-desc">The 9-preference enum is stable for the entire v1 lifecycle. Any post-launch rename or addition breaks all partner integrations using enum validation.</p>
+        <div class="item-action"><strong>Action:</strong> Freeze enum at M2; communicate the lock to all product stakeholders.</div>
+      </div>
+
+      <div class="item-card assume">
+        <div class="item-header">
+          <span class="item-id id-assume">A-005</span>
+          <span class="sev-badge sev-med">Medium</span>
+        </div>
+        <p class="item-desc">P95 &lt; 800 ms for the personalized endpoint is achievable without specifying Redis cluster sizing or CDN configuration details.</p>
+        <div class="item-action"><strong>Action:</strong> Include load test benchmarks (workstream 9) against the target percentile before M4.</div>
+      </div>
+
+      <div class="item-card assume">
+        <div class="item-header">
+          <span class="item-id id-assume">A-006</span>
+          <span class="sev-badge sev-low">Low</span>
+        </div>
+        <p class="item-desc">TLS 1.2+ is sufficient. Some regulated partners — insurers, assisted-living operators — may contractually require TLS 1.3.</p>
+        <div class="item-action"><strong>Action:</strong> Survey beta partner security requirements during M3; add TLS 1.3 support if required for GA.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- DEPENDENCIES -->
+  <section>
+    <div class="section-label">
+      <div class="section-dot dot-dep"></div>
+      <span class="section-title">Dependencies</span>
+    </div>
+    <div class="item-list">
+
+      <div class="item-card dep">
+        <div class="item-header">
+          <span class="item-id id-dep">D-001</span>
+          <span class="sev-badge sev-high">High</span>
+        </div>
+        <p class="item-desc">Baseline and personalized endpoint builds (workstreams 3 & 4) cannot start until engine extraction (workstream 1) is complete. This is the critical path with no documented buffer.</p>
+        <div class="item-action"><strong>Action:</strong> Sequence workstreams explicitly in the project plan; do not parallelize 3 or 4 with 1.</div>
+      </div>
+
+      <div class="item-card dep">
+        <div class="item-header">
+          <span class="item-id id-dep">D-002</span>
+          <span class="sev-badge sev-med">Medium</span>
+        </div>
+        <p class="item-desc">OpenAPI docs (workstream 7) depend on schema, error model, and enum being frozen. Publishing draft docs against a moving schema gives partners false confidence during private beta.</p>
+        <div class="item-action"><strong>Action:</strong> Gate workstream 7 start on schema freeze at M2; do not publish draft docs before that point.</div>
+      </div>
+
+      <div class="item-card dep">
+        <div class="item-header">
+          <span class="item-id id-dep">D-003</span>
+          <span class="sev-badge sev-med">Medium</span>
+        </div>
+        <p class="item-desc">M3 private beta partner recruitment depends on pricing model (OQ #3) and Agoda field decision (OQ #5) being resolved. Both are currently open with no owner or deadline.</p>
+        <div class="item-action"><strong>Action:</strong> Assign owners and resolution milestones to all OQs; close OQ #3 and #5 before M2.</div>
+      </div>
+
+      <div class="item-card dep">
+        <div class="item-header">
+          <span class="item-id id-dep">D-004</span>
+          <span class="sev-badge sev-low">Low</span>
+        </div>
+        <p class="item-desc">Load testing (workstream 9) depends on Redis caching (workstream 6) being production-configured. Testing against a cold cache will produce misleading latency data.</p>
+        <div class="item-action"><strong>Action:</strong> Ensure workstream 6 is complete and cluster-sized before workstream 9 begins.</div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Greytt B2B API v1 · Proposal Brief · Generated 2026-04-21
+</footer>
+
+</body>
+</html>
